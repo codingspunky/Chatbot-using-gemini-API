@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatbot</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #1c1c1c; 
+      color: #f5f5f5; 
+      margin: 0;
+    }
+
+    #chat-container {
+      background-color: #2c2c2c; 
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      width: 500px; 
+      max-width: 100%;
+      display: flex;
+      flex-direction: column;
+      height: 80vh;
+      overflow: hidden;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 28px;
+      font-weight: 600;
+      font-family: 'Poppins', sans-serif; 
+      text-transform: uppercase; 
+      letter-spacing: 1px;
+      color: #fff; 
+      border-bottom: 2px solid #fff; 
+      padding-bottom: 10px;
+      display: inline-block; 
+    }
+
+    #chat-history {
+      flex-grow: 1;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      padding-right: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center; 
+    }
+
+    .user-message {
+      text-align: left;
+      background-color: #2e2f32; 
+      padding: 12px;
+      border-radius: 15px;
+      margin-bottom: 10px;
+      max-width: 70%; 
+      word-wrap: break-word;
+      align-self: flex-end; 
+    }
+
+    .bot-message {
+      text-align: left;
+      background-color: #0f0e0e; 
+      padding: 12px;
+      border-radius: 15px;
+      margin-bottom: 10px;
+      max-width: 70%; 
+      word-wrap: break-word;
+      align-self: flex-start;
+    }
+
+    form {
+      display: flex;
+      align-items: center;
+    }
+
+    input {
+      flex-grow: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+      background-color: #4b4b4b; /* Darker background for input field */
+      color: white;
+    }
+
+    button {
+  background-color: white; /* White background */
+  color: black; /* Black text color */
+  border: none;
+  padding: 12px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-left: 10px;
+  transition: box-shadow 0.3s ease; 
+}
+
+button:hover {
+  background-color: #f0f0f0; 
+  box-shadow: 0 0 20px 1px rgba(255, 255, 255, 0.7);
+}
+
+
+    #loader {
+      display: none; 
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  </style>
+</head>
+<body>
+  <div id="chat-container">
+    <h1>Chatbot</h1>
+    <div id="chat-history"></div>
+    <form id="chat-form">
+      <input type="text" id="user-input" placeholder="Type your message..." autocomplete="off" />
+      <button type="submit">Send</button>
+    </form>
+  </div>
+  <div id="loader">
+    <img src="Loading.gif" width="40px" alt="Loading...">
+  </div>
+
+  <script>
+    const chatHistory = document.getElementById('chat-history');
+    const userInput = document.getElementById('user-input');
+    const form = document.getElementById('chat-form');
+
+    async function sendMessage() {
+      const userMessage = userInput.value;
+      userInput.value = '';
+      try {
+        const response = await fetch('/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userInput: userMessage }),
+        });
+
+        const data = await response.json();
+        const botMessage = data.response;
+
+        
+        chatHistory.innerHTML += `<div class="user-message">${userMessage}</div>`;
+        chatHistory.innerHTML += `<div class="bot-message">${botMessage}</div>`;
+
+        
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault(); 
+      const loader = document.getElementById('loader');
+      loader.style.display = 'block'; 
+      sendMessage().finally(() => {
+        loader.style.display = 'none'; 
+      });
+    });
+  </script>
+</body>
+</html>
